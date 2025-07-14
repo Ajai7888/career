@@ -1,6 +1,8 @@
 import 'package:career_guidance/screens/mentor/profile_form_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:career_guidance/services/firestore_service.dart';
 
 class MentorSignupScreen extends StatefulWidget {
   const MentorSignupScreen({super.key});
@@ -14,6 +16,7 @@ class _MentorSignupScreenState extends State<MentorSignupScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _auth = FirebaseAuth.instance;
+  final _firestore = FirestoreService();
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
 
@@ -37,20 +40,23 @@ class _MentorSignupScreenState extends State<MentorSignupScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      setState(() => _loading = false);
+
+      // ✅ Save role to Firestore
+      await _firestore.saveUserRole(_emailController.text.trim(), "mentor");
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const MentorProfileScreen()),
       );
     } on FirebaseAuthException catch (e) {
-      setState(() => _loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.message ?? "Signup failed"),
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      setState(() => _loading = false);
     }
   }
 

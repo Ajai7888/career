@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'signup_screen.dart';
+import 'package:career_guidance/services/firestore_service.dart';
 import 'profile_form_screen.dart';
 
 class StudentLoginScreen extends StatefulWidget {
@@ -14,6 +15,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _auth = FirebaseAuth.instance;
+  final _firestore = FirestoreService();
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
 
@@ -26,6 +28,17 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+
+      // ✅ Check if this email belongs to a student
+      final role = await _firestore.getUserRole(_emailController.text.trim());
+      if (role != 'student') {
+        await _auth.signOut();
+        throw FirebaseAuthException(
+          code: 'invalid-role',
+          message: 'This email is not registered as a student.',
+        );
+      }
+
       setState(() => _loading = false);
       _showStudentTypePopup(context);
     } on FirebaseAuthException catch (e) {

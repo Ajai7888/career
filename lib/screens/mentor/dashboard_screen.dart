@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../student/details_screen.dart';
 import 'interaction_screen.dart';
+import 'package:career_guidance/screens/shared/video_call_page.dart';
 
 class MentorDashboardScreen extends StatelessWidget {
   const MentorDashboardScreen({super.key});
@@ -26,9 +27,7 @@ class MentorDashboardScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const MentorInteractionScreen(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const VideoCallPage()),
                 );
               },
             ),

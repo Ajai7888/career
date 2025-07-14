@@ -2,6 +2,8 @@ import 'package:career_guidance/screens/mentor/profile_form_screen.dart';
 import 'package:career_guidance/screens/mentor/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:career_guidance/services/firestore_service.dart';
 
 class MentorLoginScreen extends StatefulWidget {
   const MentorLoginScreen({super.key});
@@ -14,12 +16,12 @@ class _MentorLoginScreenState extends State<MentorLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _auth = FirebaseAuth.instance;
+  final _firestore = FirestoreService();
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
 
   void _loginMentor() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _loading = true);
 
     try {
@@ -28,20 +30,30 @@ class _MentorLoginScreenState extends State<MentorLoginScreen> {
         password: _passwordController.text.trim(),
       );
 
-      setState(() => _loading = false);
+      // ✅ Fetch role from Firestore
+      final role = await _firestore.getUserRole(_emailController.text.trim());
+
+      if (role != 'mentor') {
+        await _auth.signOut();
+        throw FirebaseAuthException(
+          code: 'wrong-role',
+          message: 'This email is not registered as a mentor.',
+        );
+      }
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const MentorProfileScreen()),
       );
     } on FirebaseAuthException catch (e) {
-      setState(() => _loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.message ?? "Login failed"),
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      setState(() => _loading = false);
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart';
+import 'package:career_guidance/services/firestore_service.dart';
 
 class StudentSignupScreen extends StatefulWidget {
   const StudentSignupScreen({super.key});
@@ -13,6 +14,7 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _auth = FirebaseAuth.instance;
+  final _firestore = FirestoreService();
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
 
@@ -25,8 +27,11 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      setState(() => _loading = false);
 
+      // ✅ Save student role to Firestore
+      await _firestore.saveUserRole(_emailController.text.trim(), "student");
+
+      setState(() => _loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Account created successfully")),
       );
