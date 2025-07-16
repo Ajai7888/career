@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dashboard_screen.dart';
 
 class MentorProfileScreen extends StatefulWidget {
@@ -12,9 +14,33 @@ class _MentorProfileScreenState extends State<MentorProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final Map<String, String> _formData = {};
 
-  void _goToDashboard() {
+  Future<void> _saveProfileAndNavigate() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('mentors')
+              .doc(user.uid)
+              .set({
+                ..._formData,
+                'email': user.email ?? '',
+                'timestamp': Timestamp.now(),
+              });
+        } catch (e) {
+          debugPrint('❌ Firestore Error: $e');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Failed to save mentor profile."),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const MentorDashboardScreen()),
@@ -116,7 +142,7 @@ class _MentorProfileScreenState extends State<MentorProfileScreen> {
                     ),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(30),
-                      onTap: _goToDashboard,
+                      onTap: _saveProfileAndNavigate,
                       child: const Center(
                         child: Text(
                           "Proceed",

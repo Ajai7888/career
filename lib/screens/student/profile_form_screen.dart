@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dashboard_screen.dart';
 
 class ProfileFormScreen extends StatefulWidget {
@@ -95,8 +97,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
   }
 
   void _showProfileSummary() {
-    Navigator.pop(context); // close bottom sheet
-
+    Navigator.pop(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -124,9 +125,30 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     );
   }
 
-  void _goToDashboard() async {
-    Navigator.pop(context); // close bottom sheet
-    await Future.delayed(const Duration(seconds: 2)); // simulate delay
+  Future<void> _goToDashboard() async {
+    Navigator.pop(context); // Close bottom sheet
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('students')
+            .doc(user.uid)
+            .set({
+              ..._formData,
+              'type': widget.studentType,
+              'email': user.email ?? '',
+              'timestamp': Timestamp.now(),
+            });
+      } catch (e) {
+        debugPrint("🔥 Firestore error: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Error saving profile to Firestore")),
+        );
+        return;
+      }
+    }
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const StudentDashboardScreen()),

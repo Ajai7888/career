@@ -1,10 +1,42 @@
 import 'package:flutter/material.dart';
 import '../shared/career_portal_screen.dart';
 import '../shared/quiz_screen.dart';
-import 'package:career_guidance/screens/shared/video_call_page.dart';
+import '../shared/video_call_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../shared/profile_summary_screen.dart';
 
 class StudentDashboardScreen extends StatelessWidget {
   const StudentDashboardScreen({super.key});
+
+  void _showLogoutMenu(BuildContext context) {
+    showMenu(
+      context: context,
+      position: const RelativeRect.fromLTRB(1000, 80, 10, 100),
+      items: [
+        PopupMenuItem(
+          child: const Text('View Profile'),
+          onTap: () {
+            Future.delayed(
+              Duration.zero,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ProfileSummaryScreen(role: "student"),
+                ),
+              ),
+            );
+          },
+        ),
+        PopupMenuItem(
+          child: const Text('Logout'),
+          onTap: () async {
+            await FirebaseAuth.instance.signOut();
+            Navigator.popUntil(context, (route) => route.isFirst);
+          },
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +44,13 @@ class StudentDashboardScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         title: const Text("Student Dashboard"),
-        backgroundColor: Colors.white30,
+        backgroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => _showLogoutMenu(context),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
