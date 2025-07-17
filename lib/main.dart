@@ -1,6 +1,10 @@
+import 'package:career_guidance/screens/mentor/dashboard_screen.dart';
+import 'package:career_guidance/screens/student/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'screens/shared/role_selection_screen.dart';
+import 'services/firestore_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,6 +14,24 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  Future<Widget> _determineStartScreen() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      final email = user.email;
+      if (email != null) {
+        final role = await FirestoreService().getUserRole(email);
+        if (role == 'student') {
+          return const StudentDashboardScreen();
+        } else if (role == 'mentor') {
+          return const MentorDashboardScreen();
+        }
+      }
+    }
+
+    return const RoleSelectionScreen(); // default
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +61,22 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const RoleSelectionScreen(),
+      home: FutureBuilder<Widget>(
+        future: _determineStartScreen(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          } else if (snapshot.hasError) {
+            return const Scaffold(
+              body: Center(child: Text("Something went wrong")),
+            );
+          } else {
+            return snapshot.data!;
+          }
+        },
+      ),
     );
   }
 }

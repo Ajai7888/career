@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../mentor/ interaction_screen.dart';
 import '../shared/career_portal_screen.dart';
 import '../shared/quiz_screen.dart';
 import '../shared/video_call_page.dart';
@@ -65,7 +66,13 @@ class StudentDashboardScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const VideoCallPage()),
+                  MaterialPageRoute(
+                    builder: (_) => InteractionScreen(
+                      mentorId:
+                          'mentor_id', // Replace with dynamic mentor ID if needed
+                      studentId: FirebaseAuth.instance.currentUser!.uid,
+                    ),
+                  ),
                 );
               },
             ),

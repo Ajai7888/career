@@ -65,7 +65,10 @@ class MentorDashboardScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const VideoCallPage()),
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const MentorInteractionScreen(), // loads students
+                  ),
                 );
               },
             ),
