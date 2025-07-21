@@ -22,11 +22,12 @@ class _MentorProfileScreenState extends State<MentorProfileScreen> {
       if (user != null) {
         try {
           await FirebaseFirestore.instance
-              .collection('mentors')
+              .collection('users') // 🔄 Changed from 'mentors' to 'users'
               .doc(user.uid)
               .set({
                 ..._formData,
                 'email': user.email ?? '',
+                'role': 'mentor', // ✅ This makes sure mentors are listed
                 'timestamp': Timestamp.now(),
               });
         } catch (e) {

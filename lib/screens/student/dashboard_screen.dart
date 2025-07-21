@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../mentor/ interaction_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../shared/career_portal_screen.dart';
 import '../shared/quiz_screen.dart';
-import '../shared/video_call_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../shared/profile_summary_screen.dart';
+import 'mentor_list_screen.dart';
 
 class StudentDashboardScreen extends StatelessWidget {
   const StudentDashboardScreen({super.key});
@@ -32,7 +31,9 @@ class StudentDashboardScreen extends StatelessWidget {
           child: const Text('Logout'),
           onTap: () async {
             await FirebaseAuth.instance.signOut();
-            Navigator.popUntil(context, (route) => route.isFirst);
+            if (context.mounted) {
+              Navigator.popUntil(context, (route) => route.isFirst);
+            }
           },
         ),
       ],
@@ -45,7 +46,7 @@ class StudentDashboardScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         title: const Text("Student Dashboard"),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.white30,
         actions: [
           IconButton(
             icon: const Icon(Icons.menu),
@@ -66,13 +67,7 @@ class StudentDashboardScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => InteractionScreen(
-                      mentorId:
-                          'mentor_id', // Replace with dynamic mentor ID if needed
-                      studentId: FirebaseAuth.instance.currentUser!.uid,
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (_) => const MentorListScreen()),
                 );
               },
             ),
@@ -86,19 +81,6 @@ class StudentDashboardScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const CareerPortalScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            _dashboardCard(
-              context,
-              icon: Icons.quiz,
-              title: "Take a Quiz",
-              color: Colors.orange,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const QuizScreen()),
                 );
               },
             ),

@@ -4,9 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dashboard_screen.dart';
 
 class ProfileFormScreen extends StatefulWidget {
-  final String studentType; // "School" or "College"
-
-  const ProfileFormScreen({super.key, required this.studentType});
+  const ProfileFormScreen({super.key});
 
   @override
   State<ProfileFormScreen> createState() => _ProfileFormScreenState();
@@ -14,7 +12,9 @@ class ProfileFormScreen extends StatefulWidget {
 
 class _ProfileFormScreenState extends State<ProfileFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  final Map<String, String> _formData = {};
+  final Map<String, dynamic> _formData = {
+    'gender': 'Male', // default gender
+  };
 
   void _showBottomSheet() {
     if (_formKey.currentState!.validate()) {
@@ -136,7 +136,6 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
             .doc(user.uid)
             .set({
               ..._formData,
-              'type': widget.studentType,
               'email': user.email ?? '',
               'timestamp': Timestamp.now(),
             });
@@ -180,14 +179,37 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     );
   }
 
+  Widget _buildGenderDropdown() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: DropdownButtonFormField<String>(
+        value: _formData['gender'],
+        decoration: InputDecoration(
+          labelText: "Gender",
+          filled: true,
+          fillColor: Colors.grey[100],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        items: const [
+          DropdownMenuItem(value: "Male", child: Text("Male")),
+          DropdownMenuItem(value: "Female", child: Text("Female")),
+          DropdownMenuItem(value: "Other", child: Text("Other")),
+        ],
+        onChanged: (val) => setState(() => _formData['gender'] = val),
+        onSaved: (val) => _formData['gender'] = val!,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isSchool = widget.studentType == "School";
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: Text("Profile (${widget.studentType})"),
+        title: const Text("Student Profile"),
         backgroundColor: Colors.white,
         elevation: 1,
         foregroundColor: Colors.black87,
@@ -217,24 +239,15 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-                  _buildTextField("Full Name", "name"),
+                  _buildTextField("Name", "name"),
                   _buildTextField(
                     "Age",
                     "age",
                     keyboardType: TextInputType.number,
                   ),
-                  isSchool
-                      ? _buildTextField("Standard (e.g. 10th)", "standard")
-                      : _buildTextField("Degree (e.g. B.Tech)", "degree"),
-                  _buildTextField("Native Place", "native"),
-                  _buildTextField("Skills (comma-separated)", "skills"),
-                  _buildTextField("Known Languages", "languages"),
-                  _buildTextField("Interested Domain", "domain"),
-                  _buildTextField(
-                    "Mobile Number",
-                    "mobile",
-                    keyboardType: TextInputType.phone,
-                  ),
+                  _buildGenderDropdown(),
+                  _buildTextField("Favorite Subject", "favorite_subject"),
+                  _buildTextField("Hobbies", "hobbies"),
                   const SizedBox(height: 24),
                   Container(
                     width: double.infinity,

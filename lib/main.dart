@@ -1,9 +1,10 @@
 import 'package:career_guidance/screens/mentor/dashboard_screen.dart';
 import 'package:career_guidance/screens/student/dashboard_screen.dart';
+import 'package:career_guidance/screens/shared/role_selection_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'screens/shared/role_selection_screen.dart';
+
 import 'services/firestore_service.dart';
 
 void main() async {
@@ -15,6 +16,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  // Decide which screen to show on launch
   Future<Widget> _determineStartScreen() async {
     final user = FirebaseAuth.instance.currentUser;
 
@@ -30,7 +32,7 @@ class MyApp extends StatelessWidget {
       }
     }
 
-    return const RoleSelectionScreen(); // default
+    return const RoleSelectionScreen(); // Default screen if not logged in or role not found
   }
 
   @override

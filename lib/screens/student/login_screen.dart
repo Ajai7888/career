@@ -29,7 +29,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
         password: _passwordController.text.trim(),
       );
 
-      // ✅ Check if this email belongs to a student
       final role = await _firestore.getUserRole(_emailController.text.trim());
       if (role != 'student') {
         await _auth.signOut();
@@ -40,7 +39,12 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
       }
 
       setState(() => _loading = false);
-      _showStudentTypePopup(context);
+
+      // 👇 Navigate to profile screen (no student type)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const ProfileFormScreen()),
+      );
     } on FirebaseAuthException catch (e) {
       setState(() => _loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -50,45 +54,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
         ),
       );
     }
-  }
-
-  void _showStudentTypePopup(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Select Student Type"),
-        content: const Text("Please choose your student category."),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const ProfileFormScreen(studentType: "School"),
-                ),
-              );
-            },
-            child: const Text("School"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const ProfileFormScreen(studentType: "College"),
-                ),
-              );
-            },
-            child: const Text("College"),
-          ),
-        ],
-      ),
-    );
   }
 
   InputDecoration _inputDecoration(String label, IconData icon) {
